@@ -1,0 +1,49 @@
+#+TITLE: Docker image to run Emacs
+#+AUTHOR: Panu Wetterstrand
+#+EMAIL: panu.wetterstrand@iki.fi
+#+DATE: 2016-12-16
+#+OPTIONS: toc:nil h:4 html-postamble:nil html-preamble:t tex:t f:t
+#+OPTIONS: prop:("VERSION")
+#+HTML_DOCTYPE: <!DOCTYPE html>
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="style.css"/>
+#+TOC: headlines 3
+
+
+* Emacs in Docker image
+
+This repository is build using literate programming. Idea is that code is extracted from text explaining the program
+itself. This file is written using Emacs org-mode which allows extracting source code with process called "tangling".
+Unfortunately this requires Emacs. To those poor souls who do not posses such powers Docker magic can be used instead.
+
+Following command will build image containing Emacs. Copy it to the nearest terminal.
+
+#+begin_src sh :eval no :prologue "source ~/.bashrc"
+docker build -t emacs -  << EOF
+FROM ubuntu
+RUN apt-get update 
+RUN apt-get install -y emacs emacs-goodies-el
+ENTRYPOINT ["/usr/bin/emacs"]
+EOF
+#+end_src
+
+After the image has been created it can be referenced with the name (or to be exact tag) "emacs".  This image can be
+used to tangle rest of this file to source code files.
+
+#+name: docker-tangel-command
+#+begin_src sh :eval no :results output verbatin :prologue "source ~/.bashrc"
+docker run -v `pwd`:/data --rm emacs /data/readme.org --batch -f org-babel-tangle --kill
+#+end_src
+
+
+#+name: docker-export-command
+#+begin_src sh  :results output verbatin :prologue "source ~/.bashrc"
+docker run -v `pwd`:/data --rm emacs /data/readme.org --batch --eval="
+  (progn
+    (setq org-html-head-include-default-style nil)
+    (org-html-export-to-html))"
+#+end_src
+
+
+* License
+
+[[https://creativecommons.org/publicdomain/zero/1.0/][Creative Commons Zero v1.0 Universal]]
